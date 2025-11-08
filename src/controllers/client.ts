@@ -1,37 +1,45 @@
 import dgram from 'node:dgram'
-import os from 'os'
+import { getCurrentTime, setCurrentTime } from '../repositories/client'
+import type { DTO } from './server'
 
+const port = 12345
 const serverPort = 1234
-const serverAddress = '172.20.10.2'
-const clientAddress = getClientAddress()
 
 export const initClient = () => {
   const client = dgram.createSocket('udp4')
 
-  setInterval(() => {
-    client.send(
-      `Hello from client: ${clientAddress}`,
-      serverPort,
-      serverAddress,
-      (err) => {
-        if (err) {
-          console.error('Error sending message:', err)
-        } else {
-          console.log('Message sent successfully')
+  client.on('message', (msg, rinfo) => {
+    const data: DTO = JSON.parse(msg.toString())
+    if (data.type === 'time-request') {
+      // Kirim waktu lokal ke server
+      const currentTime = getCurrentTime()
+      const resMessage: DTO = {
+        type: 'time-response',
+        message: 'Here is my time',
+        time: currentTime,
+      }
+      client.send(
+        JSON.stringify(resMessage),
+        serverPort,
+        rinfo.address,
+        (err) => {
+          if (err) {
+            console.error(`Error sending time: ${err}`)
+          } else {
+            console.log(
+              `Sent time response: ${currentTime} to ${rinfo.address}:${serverPort}`
+            )
+          }
         }
-      }
-    )
-  }, 3000)
-}
-
-function getClientAddress(): string {
-  const interfaces = os.networkInterfaces()
-  for (const name of Object.keys(interfaces)) {
-    for (const net of interfaces[name]!) {
-      if (net.family === 'IPv4' && !net.internal) {
-        return net.address
-      }
+      )
+    } else if (data.type === 'offset' && typeof data.offset === 'number') {
+      // Set waktu lokal sesuai offset
+      setCurrentTime(data.offset)
+      console.log(`Received offset: ${data.offset}, adjusted local time`)
     }
-  }
-  return ''
+  })
+
+  client.bind(port, () => {
+    console.log(`Client is listening on port ${port}`)
+  })
 }
