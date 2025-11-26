@@ -55,17 +55,10 @@ function setSystemTime(newTime: Date) {
 
   switch (process.platform) {
     case 'win32':
-      // Untuk Windows, perlu dijalankan di terminal sebagai Administrator
-      const dateStringWin = `${newTime.getFullYear()}-${String(
-        newTime.getMonth() + 1
-      ).padStart(2, '0')}-${String(newTime.getDate()).padStart(2, '0')}`
-      const timeStringWin = `${String(newTime.getHours()).padStart(
-        2,
-        '0'
-      )}:${String(newTime.getMinutes()).padStart(2, '0')}:${String(
-        newTime.getSeconds()
-      ).padStart(2, '0')}`
-      command = `date ${dateStringWin} && time ${timeStringWin}`
+      // Gunakan PowerShell untuk konsistensi dan keandalan di Windows
+      // Perintah ini harus dijalankan di terminal dengan hak Administrator
+      const isoString = newTime.toISOString()
+      command = `powershell -Command "Set-Date -Date '${isoString}'"`
       break
     case 'linux':
       // Untuk Linux, perlu dijalankan dengan 'sudo'
