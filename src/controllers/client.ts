@@ -29,9 +29,13 @@ export const initClient = () => {
       )
     }
 
-    if (data.type === 'offset' && typeof data.offset === 'number') {
-      console.log(`Received offset: ${data.offset}ms`)
-      const newTime = new Date(Date.now() + data.offset)
+    if (data.type === 'offset' && typeof data.time === 'number') {
+      console.log(
+        `Received new absolute time: ${new Date(data.time).toLocaleString(
+          'id-ID'
+        )}`
+      )
+      const newTime = new Date(data.time)
 
       // Fungsi untuk mengubah waktu sistem
       setSystemTime(newTime)

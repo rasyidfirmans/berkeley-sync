@@ -57,28 +57,29 @@ export const initServer = () => {
           )
           console.log(`Average time: ${new Date(avg).toLocaleString('id-ID')}`)
 
-          // Kirim offset ke semua client
-          Object.entries(nodeTimes).forEach(([key, time]) => {
+          // Kirim waktu rata-rata absolut ke semua client
+          Object.entries(nodeTimes).forEach(([key, _time]) => {
             if (key !== 'server') {
               const [address, portStr] = key.split(':')
-              const offset = avg - time
-              const offsetMsg: DTO = {
-                type: 'offset',
-                message: 'Set your clock',
-                offset,
+              const newTimeMsg: DTO = {
+                type: 'offset', // Tipe tetap 'offset' agar client tidak perlu banyak diubah
+                message: 'Set your clock to this absolute time',
+                time: avg, // Kirim waktu absolut rata-rata
               }
               server.send(
-                JSON.stringify(offsetMsg),
+                JSON.stringify(newTimeMsg),
                 Number(portStr),
                 address,
                 (err) => {
                   if (err) {
                     console.error(
-                      `Error sending offset to ${address}:${portStr}`
+                      `Error sending new time to ${address}:${portStr}`
                     )
                   } else {
                     console.log(
-                      `Sent offset ${offset} to ${address}:${portStr}`
+                      `Sent new time ${new Date(avg).toLocaleString(
+                        'id-ID'
+                      )} to ${address}:${portStr}`
                     )
                   }
                 }
