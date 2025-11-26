@@ -51,29 +51,43 @@ export const initClient = () => {
 }
 
 function setSystemTime(newTime: Date) {
-  // Format tanggal menjadi string yang bisa dibaca oleh command line
-  // Contoh: "2025-11-26 14:30:00"
-  const dateString = `${newTime.getFullYear()}-${String(
-    newTime.getMonth() + 1
-  ).padStart(2, '0')}-${String(newTime.getDate()).padStart(2, '0')} ${String(
-    newTime.getHours()
-  ).padStart(2, '0')}:${String(newTime.getMinutes()).padStart(2, '0')}:${String(
-    newTime.getSeconds()
-  ).padStart(2, '0')}`
-
   let command: string
 
   switch (process.platform) {
     case 'win32':
       // Untuk Windows, perlu dijalankan di terminal sebagai Administrator
-      command = `date ${dateString.split(' ')[0]} && time ${
-        dateString.split(' ')[1]
-      }`
+      const dateStringWin = `${newTime.getFullYear()}-${String(
+        newTime.getMonth() + 1
+      ).padStart(2, '0')}-${String(newTime.getDate()).padStart(2, '0')}`
+      const timeStringWin = `${String(newTime.getHours()).padStart(
+        2,
+        '0'
+      )}:${String(newTime.getMinutes()).padStart(2, '0')}:${String(
+        newTime.getSeconds()
+      ).padStart(2, '0')}`
+      command = `date ${dateStringWin} && time ${timeStringWin}`
       break
     case 'linux':
+      // Untuk Linux, perlu dijalankan dengan 'sudo'
+      const dateStringLinux = `${newTime.getFullYear()}-${String(
+        newTime.getMonth() + 1
+      ).padStart(2, '0')}-${String(newTime.getDate()).padStart(
+        2,
+        '0'
+      )} ${String(newTime.getHours()).padStart(2, '0')}:${String(
+        newTime.getMinutes()
+      ).padStart(2, '0')}:${String(newTime.getSeconds()).padStart(2, '0')}`
+      command = `sudo date -s "${dateStringLinux}"`
+      break
     case 'darwin': // macOS
-      // Untuk Linux/macOS, perlu dijalankan dengan 'sudo'
-      command = `sudo date -s "${dateString}"`
+      // Format untuk macOS: MMDDHHmmYY.SS
+      const month = String(newTime.getMonth() + 1).padStart(2, '0')
+      const day = String(newTime.getDate()).padStart(2, '0')
+      const hour = String(newTime.getHours()).padStart(2, '0')
+      const minute = String(newTime.getMinutes()).padStart(2, '0')
+      const year = String(newTime.getFullYear()).substring(2)
+      const seconds = String(newTime.getSeconds()).padStart(2, '0')
+      command = `sudo date ${month}${day}${hour}${minute}${year}.${seconds}`
       break
     default:
       console.error('Unsupported OS for automatic time setting.')
