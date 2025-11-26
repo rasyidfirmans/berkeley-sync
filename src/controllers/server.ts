@@ -44,7 +44,7 @@ export const initServer = () => {
         if (err) {
           console.error(`Error sending message: ${err}`)
         } else {
-          console.log(`Broadcasted time request`)
+          console.log(`\nBroadcasted time request`)
         }
       })
 
