@@ -1,7 +1,6 @@
 import dgram from 'node:dgram'
 import { exec } from 'node:child_process'
-import type { DTO } from './server' // Asumsi DTO diekspor dari server.ts
-// Asumsi DTO diekspor dari server.ts
+import type { DTO } from './server'
 
 const serverPort = 1234
 const clientPort = 12345
@@ -37,7 +36,6 @@ export const initClient = () => {
       )
       const newTime = new Date(data.time)
 
-      // Fungsi untuk mengubah waktu sistem
       setSystemTime(newTime)
     }
   })
@@ -55,13 +53,10 @@ function setSystemTime(newTime: Date) {
 
   switch (process.platform) {
     case 'win32':
-      // Gunakan PowerShell untuk konsistensi dan keandalan di Windows
-      // Perintah ini harus dijalankan di terminal dengan hak Administrator
       const isoString = newTime.toISOString()
       command = `powershell -Command "Set-Date -Date '${isoString}'"`
       break
     case 'linux':
-      // Untuk Linux, perlu dijalankan dengan 'sudo'
       const dateStringLinux = `${newTime.getFullYear()}-${String(
         newTime.getMonth() + 1
       ).padStart(2, '0')}-${String(newTime.getDate()).padStart(
@@ -72,8 +67,7 @@ function setSystemTime(newTime: Date) {
       ).padStart(2, '0')}:${String(newTime.getSeconds()).padStart(2, '0')}`
       command = `sudo date -s "${dateStringLinux}"`
       break
-    case 'darwin': // macOS
-      // Format untuk macOS: MMDDHHmmYY.SS
+    case 'darwin':
       const month = String(newTime.getMonth() + 1).padStart(2, '0')
       const day = String(newTime.getDate()).padStart(2, '0')
       const hour = String(newTime.getHours()).padStart(2, '0')

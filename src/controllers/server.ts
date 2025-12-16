@@ -35,10 +35,8 @@ export const initServer = () => {
     console.log(`Server is listening on port ${port}`)
 
     setInterval(() => {
-      // Reset nodeTimes, simpan waktu server sendiri
       nodeTimes['server'] = Date.now()
 
-      // Broadcast permintaan waktu ke semua client
       const msg: DTO = { type: 'time-request', message: 'Give your time' }
       server.send(JSON.stringify(msg), clientPort, broadcast, (err) => {
         if (err) {
@@ -48,7 +46,6 @@ export const initServer = () => {
         }
       })
 
-      // Tunggu respons client selama 2 detik, lalu hitung rata-rata
       setTimeout(() => {
         const times = Object.values(nodeTimes)
         if (times.length > 0) {
@@ -57,14 +54,13 @@ export const initServer = () => {
           )
           console.log(`Average time: ${new Date(avg).toLocaleString('id-ID')}`)
 
-          // Kirim waktu rata-rata absolut ke semua client
           Object.entries(nodeTimes).forEach(([key, _time]) => {
             if (key !== 'server') {
               const [address, portStr] = key.split(':')
               const newTimeMsg: DTO = {
-                type: 'offset', // Tipe tetap 'offset' agar client tidak perlu banyak diubah
+                type: 'offset',
                 message: 'Set your clock to this absolute time',
-                time: avg, // Kirim waktu absolut rata-rata
+                time: avg,
               }
               server.send(
                 JSON.stringify(newTimeMsg),
